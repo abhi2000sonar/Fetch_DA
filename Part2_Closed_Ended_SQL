@@ -1,0 +1,54 @@
+1. Top 5 Brands by Receipts Scanned Among Users 21 and Over
+select 
+    p.brand,
+    count(distinct t.receipt_id) as receipts_scanned
+from 
+    transactions t
+join 
+    users u on t.user_id = u.id
+join 
+    products p on t.barcode = p.barcode
+where 
+    timestampdiff(year, u.birth_date, curdate()) >= 21
+group by 
+    p.brand
+order by 
+    receipts_scanned desc
+limit 5;
+
+2. Top 5 Brands by Sales Among Users With Accounts for at Least Six Months
+select 
+    p.brand,
+    sum(t.sale) as total_sales
+from 
+    transactions t
+join 
+    users u on t.user_id = u.id
+join 
+    products p on t.barcode = p.barcode
+where 
+    timestampdiff(month, u.created_date, curdate()) >= 6
+group by 
+    p.brand
+order by 
+    total_sales desc
+limit 5;
+
+3. Percentage of Sales in the Health & Wellness Category by Generation
+select 
+    u.generation,
+    sum(t.sale) as total_sales,
+    sum(case when p.category_1 = 'health & wellness' then t.sale else 0 end) as health_wellness_sales,
+    (sum(case when p.category_1 = 'health & wellness' then t.sale else 0 end) / sum(t.sale)) * 100 as health_wellness_percentage
+from 
+    transactions t
+join 
+    users u on t.user_id = u.id
+join 
+    products p on t.barcode = p.barcode
+group by 
+    u.generation
+order by 
+    health_wellness_percentage desc;
+
+
